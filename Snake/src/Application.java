@@ -4,7 +4,7 @@ public class Application {
     public static void main(String[] args) {
 
         int boardWidth = 600;
-        int boardHeight = boardWidth; // Set board height equal to board width
+        int boardHeight = 600; // Set board height equal to board width
 
         // Create the JFrame (window) for the game
         JFrame frame = new JFrame("Snake");

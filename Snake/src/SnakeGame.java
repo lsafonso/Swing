@@ -35,8 +35,8 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
 
     boolean gameOver = false;
 
-    // Constructor to initialize the game
-    SnakeGame(int boardWidth, int boardHeight) {
+    // Constructor to initialise the game
+    public SnakeGame(int boardWidth, int boardHeight) {
         this.boardWidth = boardWidth;
         this.boardHeight = boardHeight;
         setPreferredSize(new Dimension(this.boardWidth, this.boardHeight)); // Set the size of the game area
@@ -44,20 +44,20 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
         addKeyListener(this); // Add key listener for keyboard input
         setFocusable(true); // Ensure the panel can gain focus
 
-        // Initialize snake
+        // Initialise snake
         snakeHead = new Tile(5, 5);
         snakeBody = new ArrayList<>();
 
-        // Initialize food
+        // Initialise food
         food = new Tile(10, 10);
         random = new Random();
         placeFood();
 
-        // Initialize movement
+        // Initialise movement
         velocityX = 1;
         velocityY = 0;
 
-        // Initialize game timer
+        // Initialise game timer
         gameLoop = new Timer(100, this); // Timer to control game loop
         gameLoop.start();
     }
@@ -77,11 +77,11 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
         }
 
         // Draw food
-        g.setColor(Color.red);
+        g.setColor(Color.green);
         g.fill3DRect(food.x * tileSize, food.y * tileSize, tileSize, tileSize, true);
 
         // Draw snake head
-        g.setColor(Color.green);
+        g.setColor(Color.orange);
         g.fill3DRect(snakeHead.x * tileSize, snakeHead.y * tileSize, tileSize, tileSize, true);
 
         // Draw snake body
@@ -95,14 +95,33 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
             g.setColor(Color.red);
             g.drawString("Game Over: " + snakeBody.size(), tileSize - 16, tileSize);
         } else {
+            g.setColor(Color.orange);
             g.drawString("Score: " + snakeBody.size(), tileSize - 16, tileSize);
         }
     }
 
     // Method to place food at a random location
     public void placeFood() {
-        food.x = random.nextInt(boardWidth / tileSize);
-        food.y = random.nextInt(boardHeight / tileSize);
+        /*
+         food.x = random.nextInt(boardWidth / tileSize);
+         food.y = random.nextInt(boardHeight / tileSize);
+        */
+
+        boolean foodOnSnake;
+        do {
+            food.x = random.nextInt(boardWidth / tileSize);
+            food.y = random.nextInt(boardHeight / tileSize);
+            foodOnSnake = false;
+            if (collision(snakeHead, food)) {
+                foodOnSnake = true;
+            }
+            for (Tile snakePart : snakeBody) {
+                if (collision(snakePart, food)) {
+                    foodOnSnake = true;
+                    break;
+                }
+            }
+        } while (foodOnSnake);
     }
 
     // Method to move the snake
@@ -144,6 +163,17 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
         return tile1.x == tile2.x && tile1.y == tile2.y;
     }
 
+    // Method to reset the game
+    public void resetGame() {
+        snakeHead = new Tile(5, 5);
+        snakeBody.clear();
+        placeFood();
+        velocityX = 1;
+        velocityY = 0;
+        gameOver = false;
+        gameLoop.start();
+    }
+
     // Override actionPerformed to update game state
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -152,6 +182,13 @@ public class SnakeGame extends JPanel implements ActionListener, KeyListener {
             repaint(); // Repaint game
         } else {
             gameLoop.stop(); // Stop game loop if game is over
+
+            int response = JOptionPane.showConfirmDialog(this, "Game Over. Your score: " + snakeBody.size() + ". Do you want to restart?", "Game Over", JOptionPane.YES_NO_OPTION);
+            if (response == JOptionPane.YES_OPTION) {
+                resetGame();
+            } else {
+                System.exit(0); // Exit the application if the user does not want to restart
+            }
         }
     }
 
